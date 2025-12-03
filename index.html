@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-tema="claro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataFlow | Dashboard de Dados Inteligente</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./variaveis.css">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">📊 DataFlow</h1>
+                <p class="app-subtitle">Dashboard inteligente para análise e visualização de dados em tempo real</p>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="badge bg-light text-dark">
+                        <i class="bi bi-palette me-1"></i> Tema: <span id="temaAtual">Claro</span>
+                    </span>
+                    <span class="badge bg-light text-dark">
+                        <i class="bi bi-clock me-1"></i> Última atualização: <span id="lastUpdate">Agora</span>
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Controles -->
+        <div class="controls-bar">
+            <button id="btnAlternarTema" class="btn btn-primary">
+                <i class="bi bi-moon-stars"></i> Alternar Tema
+            </button>
+            <button id="btnCarregarDados" class="btn btn-success">
+                <i class="bi bi-cloud-arrow-down"></i> Buscar Dados
+            </button>
+            <button id="btnExportar" class="btn btn-secondary">
+                <i class="bi bi-download"></i> Exportar JSON
+            </button>
+            <button id="btnFiltrar" class="btn btn-secondary">
+                <i class="bi bi-funnel"></i> Aplicar Filtros
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros-container">
+            <div class="input-group">
+                <label for="filtroBusca"><i class="bi bi-search"></i> Buscar</label>
+                <input type="text" id="filtroBusca" placeholder="Nome, email ou cidade..." class="mask-porcentagem">
+            </div>
+            <div class="input-group">
+                <label for="filtroTipo"><i class="bi bi-tags"></i> Tipo</label>
+                <select id="filtroTipo">
+                    <option value="">Todos</option>
+                    <option value="cliente">Clientes</option>
+                    <option value="empresa">Empresas</option>
+                    <option value="startup">Startups</option>
+                    <option value="ativo">Ativos</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="filtroData"><i class="bi bi-calendar"></i> Período</label>
+                <input type="text" id="filtroData" class="mask-data" placeholder="DD/MM/AAAA">
+            </div>
+        </div>
+
+        <!-- Métricas -->
+        <div class="metricas-grid">
+            <div class="metrica-card">
+                <i class="bi bi-people fs-1 text-primary"></i>
+                <div class="metrica-valor" id="metricTotal">3</div>
+                <div class="metrica-label">Total de Registros</div>
+            </div>
+            <div class="metrica-card">
+                <i class="bi bi-cash-coin fs-1 text-success"></i>
+                <div class="metrica-valor" id="metricReceita">R$ 270.000</div>
+                <div class="metrica-label">Receita Total</div>
+            </div>
+            <div class="metrica-card">
+                <i class="bi bi-graph-up-arrow fs-1 text-info"></i>
+                <div class="metrica-valor" id="metricCrescimento">6.23%</div>
+                <div class="metrica-label">Crescimento Médio</div>
+            </div>
+            <div class="metrica-card">
+                <i class="bi bi-check-circle fs-1 text-warning"></i>
+                <div class="metrica-valor" id="metricAtivos">2</div>
+                <div class="metrica-label">Registros Ativos</div>
+            </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="grafico-container">
+            <h3 class="mb-3"><i class="bi bi-bar-chart me-2"></i>Análise de Desempenho</h3>
+            <canvas id="graficoDados"></canvas>
+        </div>
+
+        <!-- Lista de Dados -->
+        <h3 class="mb-3"><i class="bi bi-card-list me-2"></i>Registros</h3>
+        <div class="lista-container" id="listaDados">
+            <!-- Dados serão carregados aqui via JavaScript -->
+        </div>
+
+        <!-- Formulário para Novo Dado -->
+        <div class="form-container">
+            <h3 class="form-title"><i class="bi bi-plus-circle me-2"></i>Adicionar Novo Registro</h3>
+            <form id="formNovoDado">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="nome"><i class="bi bi-person"></i> Nome Completo</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Digite o nome">
+                    </div>
+                    <div class="input-group">
+                        <label for="email"><i class="bi bi-envelope"></i> E-mail</label>
+                        <input type="email" id="email" name="email" required placeholder="exemplo@dominio.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="cidade"><i class="bi bi-geo-alt"></i> Cidade</label>
+                        <input type="text" id="cidade" name="cidade" required placeholder="Cidade">
+                    </div>
+                    <div class="input-group">
+                        <label for="empresa"><i class="bi bi-building"></i> Empresa</label>
+                        <input type="text" id="empresa" name="empresa" required placeholder="Nome da empresa">
+                    </div>
+                    <div class="input-group">
+                        <label for="receita"><i class="bi bi-currency-dollar"></i> Receita (R$)</label>
+                        <input type="text" id="receita" name="receita" class="mask-dinheiro" required placeholder="0,00">
+                    </div>
+                    <div class="input-group">
+                        <label for="crescimento"><i class="bi bi-percent"></i> Crescimento (%)</label>
+                        <input type="text" id="crescimento" name="crescimento" class="mask-porcentagem" required placeholder="0,00%">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-lg me-2"></i> Adicionar Registro
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>
+                <strong>DataFlow Dashboard</strong> • v2.0 • 
+                <span id="anoAtual">2024</span> • 
+                <a href="#" class="text-decoration-none" onclick="app.alternarTema()">Alternar tema</a> • 
+                <a href="#" class="text-decoration-none" onclick="app.exportarDados()">Exportar dados</a>
+            </p>
+            <p class="text-muted small">
+                <i class="bi bi-info-circle"></i> 
+                Arraste os cards para reordenar • Pressione Ctrl+D para duplicar selecionados
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="./jquery.mask.min.js"></script>
+    <script src="./main.js"></script>
+    <script>
+        // Atualizar ano no footer
+        document.getElementById('anoAtual').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
